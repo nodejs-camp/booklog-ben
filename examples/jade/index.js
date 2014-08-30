@@ -42,16 +42,16 @@ app.get('/', function(req, res){
 var posts = [];
 var count = 0;
 
-app.all('*', function(req, res, next){ //app.all不管所有協定都去跑，*代表所有url也是
+//app.all('*', function(req, res, next){ //app.all不管所有協定都去跑，*代表所有url也是
 	console.log('count'+count++);//計算瀏覽次數
-	if (req.headers.host === 'localhost:3000') {
+	/*if (req.headers.host === 'localhost:3000') {
 		console.log("Access denied"); //阻止其他人去讀下面的API
 	}
 	else {
 		next(); //告訴express此條件成立，繼續往下比較路徑
-	}
+	}*/
 	
-});
+//});
 
 
 app.get('/1/post', function(req, res){//call back function，前面為set uri，後面為執行function
