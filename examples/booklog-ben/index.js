@@ -15,7 +15,7 @@ app.use(express.static(pub));
 
 // Optional since express defaults to CWD/views
 
-app.set('views', __dirname + '/views');
+app.set('views', __dirname + '/views'); // 從view folder去讀取頁面
 
 // Set our default template engine to "jade"
 // which prevents the need for extensions
@@ -40,6 +40,15 @@ app.get('/', function(req, res){
 });
 
 var posts = [];
+
+var post = [{
+	subject: "subject",
+	content: "content"
+},{
+	subject: "Hello",
+	content: "hi"
+}];
+
 var count = 0;
 
 app.get('/welcome', function(req, res){
@@ -47,7 +56,12 @@ app.get('/welcome', function(req, res){
 	
 });
 
-
+app.get('/post', function(req, res){
+	res.render('post',{
+		post: post
+	}); //從view folder讀取post.jade檔案
+	
+});
 //app.all('*', function(req, res, next){ //app.all不管所有協定都去跑，*代表所有url也是
 	//console.log('count'+count++);//計算瀏覽次數
 	/*if (req.headers.host === 'localhost:3000') {
