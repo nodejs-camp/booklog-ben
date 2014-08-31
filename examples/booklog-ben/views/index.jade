@@ -1,0 +1,59 @@
+div
+	h2 hello
+	p I'm ben
+	div
+		h2 world
+
+!!! 5
+html
+  head
+    title test boostrap
+    meta(charset='UTF-8')
+    //
+       需要加入讓WEB知道有中文編碼 
+    meta(name='viewport', content='width=device-width, initital-scale=1.0')
+    //
+      網頁如要以手機為主，需加入viewport設置
+    link(href='css/bootstrap.min.css', rel='stylesheet')
+    script(type='js/bootstrap.min.js')
+  body
+    .row
+      //
+         一個row代表一個頁面，一個row可以切12個col 
+      .col-lg-4.col-4
+        h1 Hello
+      //
+         col-lg-4 代表切4個col，col-4為responsive，不管大小屏幕都可做切割 
+      .col-lg-4.col-4
+        h2 world
+      .col-lg-4.col-4
+        h2 Ben
+    .row
+      //
+        可以到boostrap網站 -> CSS -> grid system章節了解 
+      .col-lg-4
+        button.btn.btn-default click A
+      //
+        class="btn"為使用bosstrap的CSS樣式，CSS取class去改樣是為.col-lg-4 
+      .col-lg-4
+        button.btn
+          span.glyphicon.glyphicon-asterisk
+          | click B
+          //
+            透過Glyphicons去使用Boostrap原生的icons
+      .col-lg-4
+        button click C
+    .row
+      .col-lg-3
+        h1 廣告資訊
+      .col-lg-9
+        h2
+          span.glyphicon.glyphicon-star
+          | 我的文章
+        p.alert 我希望你八月份將工作專注在論文、報告撰寫。論文的部分可先把架構整理出來，我想投稿到「2014中華民國科技管理學會年會暨論文研討會」
+        //
+          到boostrap網頁-> component可以找到素材，包含button or alert 
+        p 集山可交由產品支援組William處理，今天拜訪永錡回來，請與Ben、我一起討論一下分工，謝謝。
+        //
+          每個段落會用1個<p></P> 
+        p 而另外像Tokai、集山也都需要再協助處理，昨日才又處理與了解集山問題，此部分都需考量。
