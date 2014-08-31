@@ -70,7 +70,7 @@ app.get('/download', function(req, res){
 	var workflow = new events.EventEmitter(); //載入到記憶體中，類別實例化
 
 	workflow.outcome = {  //outcome 為一物件
-		success: false, // tag & value
+		success: false // tag & value
 	};
 
 	workflow.on('validate', function(){  //開始設定workflow狀態檢查
