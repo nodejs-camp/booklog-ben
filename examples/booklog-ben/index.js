@@ -41,7 +41,7 @@ app.get('/', function(req, res){
 
 var posts = [];
 
-var post = [{
+var postcontent = [{
 	subject: "subject",
 	content: "content"
 },{
@@ -58,10 +58,71 @@ app.get('/welcome', function(req, res){
 
 app.get('/post', function(req, res){
 	res.render('post',{
-		post: post
+		post: postcontent
 	}); //從view folder讀取post.jade檔案
 	
 });
+
+var count = 0 ;
+
+app.get('/download', function(req, res){
+	var events = require('events'); // require等於import events class
+	var workflow = new events.EventEmitter(); //載入到記憶體中，類別實例化
+
+	workflow.outcome = {  //outcome 為一物件
+		success: false, // tag & value
+	};
+
+	workflow.on('validate', function(){  //開始設定workflow狀態檢查
+		var password = req.query.password;
+
+		if (password === '123456'){
+			return workflow.emit('success'); //emitter.emit(event, [arg1], [arg2], [...])方法
+			
+		}
+		return workflow.emit('error');
+	});
+
+	workflow.on('success', function(){
+		workflow.outcome.success = true;
+		workflow.outcome.redirect = {
+			url: '/weclome'
+		};
+		workflow.emit('response');
+	});
+
+	workflow.on('error', function(){
+		count ++; 
+		workflow.outcome.success = false;
+		workflow.emit('response');
+	});
+
+	workflow.on('response', function() {
+		console.log('count'+count);
+		if (count ===3) {
+			res.send(workflow.outcome);
+			console.log("吃屎吧");
+		}else{
+			res.send(workflow.outcome);
+			
+		}
+		});
+		return workflow.emit('validate');
+	});
+
+
+app.all('*', function(req, res, next){
+  if (!req.get('Origin')) return next();
+  // use "*" here to accept any origin
+  res.set('Access-Control-Allow-Origin', '*'); //set http header 可以允許不同網域的人來讀取此網頁
+  res.set('Access-Control-Allow-Methods', 'PUT');
+  res.set('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
+  // res.set('Access-Control-Allow-Max-Age', 3600);
+  if ('OPTIONS' == req.method) return res.send(200);
+  next();
+});
+
+
 //app.all('*', function(req, res, next){ //app.all不管所有協定都去跑，*代表所有url也是
 	//console.log('count'+count++);//計算瀏覽次數
 	/*if (req.headers.host === 'localhost:3000') {
