@@ -10,8 +10,9 @@ var pub = __dirname + '/public';
 
 // setup middleware
 
-var app = express();
+var app = express(); // app這物件所有index.js裡面都可使用
 app.use(express.static(pub));
+
 
 // Optional since express defaults to CWD/views
 
@@ -49,9 +50,14 @@ var postcontent = [{
 	content: "hi"
 }];
 
+var bodyParser = require('body-parser'); //require等於import events class，因為他是外部模組(npm body-parser模組)
+app.use(bodyParser.urlencoded({
+	extended: true
+	}));
+
 var count = 0;
 
-app.get('/welcome', function(req, res){
+app.get('/welcome', function(req, res){ 
 	res.render('index'); //從view folder讀取index.jade檔案
 	
 });
@@ -66,7 +72,7 @@ app.get('/post', function(req, res){
 var count = 0 ;
 
 app.get('/download', function(req, res){
-	var events = require('events'); // require等於import events class
+	var events = require('events'); // require等於import events class，因為他是外部模組
 	var workflow = new events.EventEmitter(); //載入到記憶體中，類別實例化
 
 	workflow.outcome = {  //outcome 為一物件
@@ -135,12 +141,13 @@ app.all('*', function(req, res, next){
 //});
 
 
-app.get('/1/post', function(req, res){//call back function，前面為set uri，後面為執行function
-	var result = {
+app.get('/1/post', function(req, res){//call back function，前面行為set uri執行完，再執行後面function
+	/*var result = {
 		titl: "Test",
 		content: "Foo"
-	}; //{}為JS的物件
-	res.send(result);
+	}; //{}為JS的物件 */
+	res.send({post: posts});	
+	//res.send(result);
 });  
 
 app.post('/1/post', function(req, res){//call back function，前面為set uri，後面為執行function

@@ -54,13 +54,14 @@ var count = 0;
 });*/
 
 
-app.get('/1/post', function(req, res){//call back function，前面為set uri，後面為執行function
-	var result = {
-		titl: "Test",
-		content: "Foo"
-	}; //{}為JS的物件
+app.get('/1/post', function(req,res){
+	var result ={
+		title : "gogo",
+		content: "oyoy"
+	};
 	res.send(result);
-});  
+});
+
 
 app.post('/1/post', function(req, res){//call back function，前面為set uri，後面為執行function
 	var subject;
@@ -77,6 +78,7 @@ app.post('/1/post', function(req, res){//call back function，前面為set uri�
 	};
 	posts.push(post); 
 	res.send({status:'ok', posts:post}); 
+
 });  
 
 /*app.post('/1/post', function(req, res){ // app.post為rest post 方法
