@@ -53,6 +53,92 @@ var count = 0;
 	
 });*/
 
+app.get('/welcome', function(req, res){
+	res.render('index');
+});
+
+app.get('/download', function(req, res){
+	var events = require('events');
+	var workflow = new events.EventEmitter();
+
+	workflow.outcomes = {
+		success : true 
+	};
+
+	workflow.on('validate', function(){
+		var password = req.query.password;
+
+		if (password === '123456'){
+			return workflow.emit('success');
+		};
+		return workflow.emit('error');
+	});
+	workflow.on('success', function(){
+		workflow.outcomes.success = true;
+		workflow.outcomes.redirect = {
+			url : '/welcome'
+		};
+		workflow.emit('response');
+	});
+	workflow.on('error', function(){
+		count ++;
+		workflow.outcomes.success = false;
+		workflow.emit('response');
+
+	});
+	workflow.on('response', function(){
+		if(count === 3){
+			res.send(workflow.outcomes);
+		}else{
+			res.send(workflow.outcomes);
+		};
+
+	});
+	return workflow.emit('validate');
+});
+
+
+
+
+
+
+app.get('/download', function(req,res){
+	var events = require('events');
+	var workflow = new events.EventEmitter();
+
+	workflow.outcome = {
+		success : false
+	}
+
+	workflow.on('validate', function(){
+		var password = req.query.password;
+		if (password=== '123456'){
+			return workflow.emit('success');
+		}
+		return workflow.emit('error');
+	});
+
+	workflow.on('success', function(){
+		workflow.outcome.success = true;
+		workflow.outcome.redirect={
+			url : '/welcome'
+		};
+		workflow.emit('response');
+	});
+	workflow.on('error', function(){
+		count++;
+		workflow.outcome.success=false;
+		workflow.emit('response');
+	});
+	workflow.on('response', function(){
+		if(count===3){
+			res.send(workflow.outcome);
+		}else{
+			res.send(workflow.outcome);
+		};
+	});
+	return workflow.emit('validate');
+});
 
 app.get('/1/post', function(req,res){
 	var result ={
@@ -62,24 +148,20 @@ app.get('/1/post', function(req,res){
 	res.send(result);
 });
 
-
-app.post('/1/post', function(req, res){//call back function，前面為set uri，後面為執行function
+app.post('/1/post', function(req, res){
 	var subject;
 	var content;
-	
-	if (typeof(req.body) === 'undefined') { //型態與字串要相等
-		subject = req.query.subject; //讀request body 裡面 key為subject的值
-		content = req.query.content; //讀request body 裡面 key為content的值
+	if (typeof(req.body)==='undefined'){
+		subject = req.query.subject;
+		content = req.query.content;
 	};
-	console.log(req.body);
 	var post = {
-		subject: subject,
-		content: content
-	};
-	posts.push(post); 
-	res.send({status:'ok', posts:post}); 
+		subject : subject,
+		content : content
+	}
+	res.send({status:'ok',post:post});
 
-});  
+});
 
 /*app.post('/1/post', function(req, res){ // app.post為rest post 方法
 	var result = {

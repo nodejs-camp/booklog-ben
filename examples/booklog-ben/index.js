@@ -80,12 +80,12 @@ app.get('/download', function(req, res){
 	};
 
 	workflow.on('validate', function(){  //開始設定workflow狀態檢查
-		var password = req.query.password;
+		var password = req.query.password;  //在用API打時，url需要打成這樣http://localhost:3000/download?password=123456
 
 		if (password === '123456'){
 			return workflow.emit('success'); //emitter.emit(event, [arg1], [arg2], [...])方法
 			
-		}
+		};
 		return workflow.emit('error');
 	});
 
@@ -111,7 +111,7 @@ app.get('/download', function(req, res){
 		}else{
 			res.send(workflow.outcome);
 			
-		}
+		};
 		});
 		return workflow.emit('validate');
 	});
