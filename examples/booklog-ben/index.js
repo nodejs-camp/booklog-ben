@@ -16,6 +16,26 @@ app.use(express.static(pub));
 
 // Optional since express defaults to CWD/views
 
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/booklog2');
+
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function callback () {
+  console.log('MongoDB: connected.');	
+});
+
+var postSchema = new mongoose.Schema({  //db schema define 兩個欄位 subject & content (key)
+    subject: { type: String, default: ''},
+    content: String
+});
+
+app.db = {   
+	posts: mongoose.model('Post', postSchema)  //將model的內容放到app express 框架裡面，Post為model name
+};
+
+
+
 app.set('views', __dirname + '/views'); // 從view folder去讀取頁面
 
 // Set our default template engine to "jade"
@@ -71,7 +91,7 @@ app.get('/post', function(req, res){
 
 var count = 0 ;
 
-app.get('/download', function(req, res){
+app.get('/download', function(req, res){ //此命名風格為網頁
 	var events = require('events'); // require等於import events class，因為他是外部模組
 	var workflow = new events.EventEmitter(); //載入到記憶體中，類別實例化
 
@@ -140,8 +160,8 @@ app.all('*', function(req, res, next){
 	
 //});
 
-
-app.get('/1/post', function(req, res){//call back function，前面行為set uri執行完，再執行後面function
+//此命名風格為API，只回傳給JSON
+app.get('/1/post', function(req, res){//call back function，前面行為set url執行完，再將後面匿名函數當作參數執行，req為express所給的物件
 	/*var result = {
 		titl: "Test",
 		content: "Foo"
@@ -150,7 +170,7 @@ app.get('/1/post', function(req, res){//call back function，前面行為set uri
 	//res.send(result);
 });  
 
-app.post('/1/post', function(req, res){//call back function，前面為set uri，後面為執行function
+app.post('/1/post', function(req, res){//call back function，前面為set url，後面為執行function
 	var subject;
 	var content;
 	
@@ -163,6 +183,12 @@ app.post('/1/post', function(req, res){//call back function，前面為set uri�
 		subject: subject,
 		content: content
 	};
+	
+	var card = new posts(post); //new 一個目錄posts下new一個新檔案，裡面放post內容
+	card.save(); //save完mongodb會自動產生一筆id
+
+
+
 	posts.push(post); 
 	res.send({status:'ok', posts:post}); 
 });  

@@ -57,49 +57,6 @@ app.get('/welcome', function(req, res){
 	res.render('index');
 });
 
-app.get('/download', function(req, res){
-	var events = require('events');
-	var workflow = new events.EventEmitter();
-
-	workflow.outcomes = {
-		success : true 
-	};
-
-	workflow.on('validate', function(){
-		var password = req.query.password;
-
-		if (password === '123456'){
-			return workflow.emit('success');
-		};
-		return workflow.emit('error');
-	});
-	workflow.on('success', function(){
-		workflow.outcomes.success = true;
-		workflow.outcomes.redirect = {
-			url : '/welcome'
-		};
-		workflow.emit('response');
-	});
-	workflow.on('error', function(){
-		count ++;
-		workflow.outcomes.success = false;
-		workflow.emit('response');
-
-	});
-	workflow.on('response', function(){
-		if(count === 3){
-			res.send(workflow.outcomes);
-		}else{
-			res.send(workflow.outcomes);
-		};
-
-	});
-	return workflow.emit('validate');
-});
-
-
-
-
 
 
 app.get('/download', function(req,res){
