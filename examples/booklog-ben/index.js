@@ -25,13 +25,13 @@ db.once('open', function callback () {
   console.log('MongoDB: connected.');	
 });
 
-var postSchema = new mongoose.Schema({  //db schema define 兩個欄位 subject & content (key)
+var postSchema = new mongoose.Schema({
     subject: { type: String, default: ''},
     content: String
 });
 
-app.db = {   
-	posts: mongoose.model('Post', postSchema)  //將model的內容放到app express 框架裡面，Post為model name
+app.db = {
+	posts: mongoose.model('Post', postSchema)
 };
 
 
@@ -162,16 +162,46 @@ app.all('*', function(req, res, next){
 
 //此命名風格為API，只回傳給JSON
 app.get('/1/post', function(req, res){//call back function，前面行為set url執行完，再將後面匿名函數當作參數執行，req為express所給的物件
+	var posts = req.app.db.posts;
+
+	posts.find(function(err, posts) {
+		res.send({posts: posts});	
+	});
+
 	/*var result = {
 		titl: "Test",
 		content: "Foo"
 	}; //{}為JS的物件 */
-	res.send({post: posts});	
+	//res.send({post: posts});	
 	//res.send(result);
 });  
 
 app.post('/1/post', function(req, res){//call back function，前面為set url，後面為執行function
+	var posts = req.app.db.posts;
+
 	var subject;
+	var content;
+
+	if (typeof(req.body.subject) === 'undefined') {
+		subject = req.query.subject;
+		content = req.query.content;
+
+	} else {
+		subject = req.body.subject;
+		content = req.body.content;		
+	}
+
+	var data = {
+		subject: subject,
+		content: content
+	};
+	console.log(data);
+	var post = new posts(data);
+	post.save();
+
+	res.send({ status: 'OK'})
+
+	/*var subject;
 	var content;
 	
 	if (typeof(req.body) === 'undefined') { //型態與字串要相等
@@ -190,7 +220,7 @@ app.post('/1/post', function(req, res){//call back function，前面為set url�
 
 
 	posts.push(post); 
-	res.send({status:'ok', posts:post}); 
+	res.send({status:'ok', posts:post}); */
 });  
 
 /*app.post('/1/post', function(req, res){ // app.post為rest post 方法
@@ -203,7 +233,12 @@ app.post('/1/post', function(req, res){//call back function，前面為set url�
 
 app.put('/1/post/:postId', function(req, res){ //uri :後面代的為參數
 	var id = req.params.postId;
-	res.send("updated a post"+id);
+	var posts = req.app.db.posts;
+
+	posts.findOne({_id: id}, function(err, post) {
+		res.send({post: post});	
+	});
+	//res.send("updated a post"+id);
 
 	/*var result = {
 		titl: "Test",
@@ -213,11 +248,18 @@ app.put('/1/post/:postId', function(req, res){ //uri :後面代的為參數
 }); 
 
 app.delete('/1/post', function(req, res){
-	var result = {
+	var posts = req.app.db.posts;
+
+	posts.find(function(err, posts) {
+		res.send({posts: posts});	
+	});
+
+
+	/*var result = {
 		titl: "Test",
 		content: "delete"
 	}; //{}為JS的物件
-	res.send(result);
+	res.send(result);*/
 }); 
 // change this to a better error handler in your code
 // sending stacktrace to users in production is not good
