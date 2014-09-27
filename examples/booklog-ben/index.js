@@ -25,13 +25,23 @@ db.once('open', function callback () {
   console.log('MongoDB: connected.');	
 });
 
+
 var postSchema = new mongoose.Schema({
     subject: { type: String, default: ''},
     content: String
 });
 
+var userSchema = new mongoose.Schema({ //Define db schema
+    username: { type: String, unique: true },
+    displayName: { type: String, unique: true },
+    email: { type: String, unique: true },
+    timeCreated: { type: Date, default: Date.now },
+    facebook: {}
+});
+
 app.db = {
-	posts: mongoose.model('Post', postSchema)
+	posts: mongoose.model('Post', postSchema),
+	users: mongoose.model('User', userSchema)
 };
 
 
@@ -100,7 +110,8 @@ app.get('/download', function(req, res){ //此命名風格為網頁
 	};
 
 	workflow.on('validate', function(){  //開始設定workflow狀態檢查
-		var password = req.query.password;  //在用API打時，url需要打成這樣http://localhost:3000/download?password=123456
+		var password = req.query.password;  
+		//在用API打時，url需要打成這樣http://localhost:3000/download?password=123456
 
 		if (password === '123456'){
 			return workflow.emit('success'); //emitter.emit(event, [arg1], [arg2], [...])方法
@@ -189,7 +200,8 @@ app.all('*', function(req, res, next){
 //});
 
 //此命名風格為API，只回傳給JSON
-app.get('/1/post', function(req, res){//call back function，前面行為set url執行完，再將後面匿名函數當作參數執行，req為express所給的物件
+app.get('/1/post', function(req, res){
+//call back function，前面行為set url執行完，再將後面匿名函數當作參數執行，req為express所給的物件
 	var posts = req.app.db.posts;
 
 	posts.find(function(err, posts) {
