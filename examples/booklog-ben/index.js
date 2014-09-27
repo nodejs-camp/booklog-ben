@@ -66,11 +66,8 @@ var users = [
 ];
 
 
-app.get('/', function(req, res){
-  res.render('users', { users: users });
-});
 
-var posts = [];
+/*var posts = [];
 
 var postcontent = [{
 	subject: "subject",
@@ -78,7 +75,7 @@ var postcontent = [{
 },{
 	subject: "Hello",
 	content: "hi"
-}];
+}]; */
 
 var bodyParser = require('body-parser'); //require等於import events class，因為他是外部模組(npm body-parser模組)
 app.use(bodyParser.urlencoded({
@@ -87,6 +84,83 @@ app.use(bodyParser.urlencoded({
 
 var count = 0;
 
+ //2014.9.27 -start
+var session = require('express-session');
+var passport = require('passport')
+  , FacebookStrategy = require('passport-facebook').Strategy;
+
+app.use(session({ secret: 'keyboard cat' }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
+});
+
+
+passport.use(new FacebookStrategy({
+    clientID: '476495939156713',
+    clientSecret: '59632e5641297193a0323bf25a7ebcef',
+    callbackURL: "http://localhost:3000/auth/facebook/callback"
+  },
+  function(accessToken, refreshToken, profile, done) {
+    console.log(profile);
+  	return done(null, profile);
+  }
+));
+
+// Redirect the user to Facebook for authentication.  When complete,
+// Facebook will redirect the user back to the application at
+//     /auth/facebook/callback
+app.get('/auth/facebook', passport.authenticate('facebook'));
+
+// Facebook will redirect the user to this URL after approval.  Finish the
+// authentication process by attempting to obtain an access token.  If
+// access was granted, the user will be logged in.  Otherwise,
+// authentication has failed.
+app.get('/auth/facebook/callback', 
+  passport.authenticate('facebook', { successRedirect: '/',
+                                      failureRedirect: '/login' }));
+//2014.9.27 end
+
+
+app.all('*', function(req, res, next){
+  if (!req.get('Origin')) return next();
+  // use "*" here to accept any origin
+  res.set('Access-Control-Allow-Origin', '*'); //set http header 可以允許不同網域的人來讀取此網頁
+  res.set('Access-Control-Allow-Methods', 'PUT');
+  res.set('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
+  // res.set('Access-Control-Allow-Max-Age', 3600);
+  if ('OPTIONS' == req.method) return res.send(200);
+  next();
+});
+
+app.get('/', function(req, res, next) {
+	if (req.isAuthenticated()) {
+		next();
+	} else {
+		res.render('login');
+	}
+});
+
+app.get('/', function(req, res) {
+	res.render('index');
+});
+
+//app.all('*', function(req, res, next){ //app.all不管所有協定都去跑，*代表所有url也是
+	//console.log('count'+count++);//計算瀏覽次數
+	/*if (req.headers.host === 'localhost:3000') {
+		console.log("Access denied"); //阻止其他人去讀下面的API
+	}
+	else {
+		next(); //告訴express此條件成立，繼續往下比較路徑
+	}*/
+	
+//});
 app.get('/welcome', function(req, res){ 
 	res.render('index'); //從view folder讀取index.jade檔案
 	
@@ -99,7 +173,6 @@ app.get('/post', function(req, res){
 	
 });
 
-var count = 0 ;
 
 app.get('/download', function(req, res){ //此命名風格為網頁
 	var events = require('events'); // require等於import events class，因為他是外部模組
@@ -146,83 +219,6 @@ app.get('/download', function(req, res){ //此命名風格為網頁
 		});
 		return workflow.emit('validate');
 	});
- 
- //2014.9.27 -start
-var session = require('express-session');
-var passport = require('passport')
-  , FacebookStrategy = require('passport-facebook').Strategy;
-
-app.use(session({ secret: 'keyboard cat' }));
-app.use(passport.initialize());
-app.use(passport.session());
-
-passport.serializeUser(function(user, done) {
-  done(null, user);
-});
-
-passport.deserializeUser(function(obj, done) {
-  done(null, obj);
-});
-
-passport.use(new FacebookStrategy({
-    clientID: '476495939156713',
-    clientSecret: '59632e5641297193a0323bf25a7ebcef',
-    callbackURL: "http://localhost:3000/auth/facebook/callback"
-  },
-  function(accessToken, refreshToken, profile, done) {
-    console.log(profile);
-  	return done(null, profile);
-  }
-));
-
-// Redirect the user to Facebook for authentication.  When complete,
-// Facebook will redirect the user back to the application at
-//     /auth/facebook/callback
-app.get('/auth/facebook', passport.authenticate('facebook'));
-
-// Facebook will redirect the user to this URL after approval.  Finish the
-// authentication process by attempting to obtain an access token.  If
-// access was granted, the user will be logged in.  Otherwise,
-// authentication has failed.
-app.get('/auth/facebook/callback', 
-  passport.authenticate('facebook', { successRedirect: '/',
-                                      failureRedirect: '/login' }));
-//2014.9.27 end
-
-app.get('/', function(req, res, next) {
-	if (req.isAuthenticated()) {
-		next();
-	} else {
-		res.render('login');
-	}
-});
-
-app.get('/', function(req, res) {
-	res.render('index');
-});
-
-app.all('*', function(req, res, next){
-  if (!req.get('Origin')) return next();
-  // use "*" here to accept any origin
-  res.set('Access-Control-Allow-Origin', '*'); //set http header 可以允許不同網域的人來讀取此網頁
-  res.set('Access-Control-Allow-Methods', 'PUT');
-  res.set('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
-  // res.set('Access-Control-Allow-Max-Age', 3600);
-  if ('OPTIONS' == req.method) return res.send(200);
-  next();
-});
-
-
-//app.all('*', function(req, res, next){ //app.all不管所有協定都去跑，*代表所有url也是
-	//console.log('count'+count++);//計算瀏覽次數
-	/*if (req.headers.host === 'localhost:3000') {
-		console.log("Access denied"); //阻止其他人去讀下面的API
-	}
-	else {
-		next(); //告訴express此條件成立，繼續往下比較路徑
-	}*/
-	
-//});
 
 //此命名風格為API，只回傳給JSON
 app.get('/1/post', function(req, res){
@@ -261,8 +257,8 @@ app.post('/1/post', function(req, res){//call back function，前面為set url�
 		content: content
 	};
 	console.log(data);
-	var post = new posts(data);
-	post.save();
+	var post = new posts(data); //call method 會回傳一個參數給post
+	post.save(); //再把這參數存回
 
 	res.send({ status: 'OK'})
 
