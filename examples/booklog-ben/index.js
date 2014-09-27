@@ -226,6 +226,11 @@ app.get('/download', function(req, res){ //此命名風格為網頁
 		return workflow.emit('validate');
 	});
 
+app.get('/logout', function(req, res){
+  req.logout();
+  res.redirect('/');
+});
+
 app.get('/welcome', function(req, res){ 
 	res.render('index'); //從view folder讀取index.jade檔案
 	
@@ -238,6 +243,25 @@ app.get('/post', function(req, res){
 	
 });
 
+app.get('/1/post', function(req, res) {	
+	var posts = req.app.db.posts;
+
+	posts
+	.find()
+	.populate('userId')
+	.exec(function(err, posts) {
+		res.send({posts: posts});	
+	});
+});
+
+
+app.post('/1/post', function(req, res, next) {
+	if (req.isAuthenticated()) {
+		next();
+	} else {
+		res.render('login');
+	}
+});
 
 //此命名風格為API，只回傳給JSON
 app.get('/1/post', function(req, res){
