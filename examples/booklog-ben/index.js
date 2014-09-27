@@ -148,8 +148,21 @@ app.get('/download', function(req, res){ //此命名風格為網頁
 	});
  
  //2014.9.27 -start
+var session = require('express-session');
 var passport = require('passport')
   , FacebookStrategy = require('passport-facebook').Strategy;
+  
+app.use(session({ secret: 'keyboard cat' }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
+});
 
 passport.use(new FacebookStrategy({
     clientID: '476495939156713',
@@ -187,7 +200,17 @@ app.all('*', function(req, res, next){
   next();
 });
 
+app.get('/', function(req, res, next) {
+	if (req.isAuthenticated()) {
+		next();
+	} else {
+		res.render('login');
+	}
+});
 
+app.get('/', function(req, res) {
+	res.render('index');
+});
 //app.all('*', function(req, res, next){ //app.all不管所有協定都去跑，*代表所有url也是
 	//console.log('count'+count++);//計算瀏覽次數
 	/*if (req.headers.host === 'localhost:3000') {
