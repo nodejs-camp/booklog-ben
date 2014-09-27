@@ -151,7 +151,7 @@ app.get('/download', function(req, res){ //此命名風格為網頁
 var session = require('express-session');
 var passport = require('passport')
   , FacebookStrategy = require('passport-facebook').Strategy;
-  
+
 app.use(session({ secret: 'keyboard cat' }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -171,7 +171,7 @@ passport.use(new FacebookStrategy({
   },
   function(accessToken, refreshToken, profile, done) {
     console.log(profile);
-  
+  	return done(null, profile);
   }
 ));
 
@@ -189,17 +189,6 @@ app.get('/auth/facebook/callback',
                                       failureRedirect: '/login' }));
 //2014.9.27 end
 
-app.all('*', function(req, res, next){
-  if (!req.get('Origin')) return next();
-  // use "*" here to accept any origin
-  res.set('Access-Control-Allow-Origin', '*'); //set http header 可以允許不同網域的人來讀取此網頁
-  res.set('Access-Control-Allow-Methods', 'PUT');
-  res.set('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
-  // res.set('Access-Control-Allow-Max-Age', 3600);
-  if ('OPTIONS' == req.method) return res.send(200);
-  next();
-});
-
 app.get('/', function(req, res, next) {
 	if (req.isAuthenticated()) {
 		next();
@@ -211,6 +200,19 @@ app.get('/', function(req, res, next) {
 app.get('/', function(req, res) {
 	res.render('index');
 });
+
+app.all('*', function(req, res, next){
+  if (!req.get('Origin')) return next();
+  // use "*" here to accept any origin
+  res.set('Access-Control-Allow-Origin', '*'); //set http header 可以允許不同網域的人來讀取此網頁
+  res.set('Access-Control-Allow-Methods', 'PUT');
+  res.set('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type');
+  // res.set('Access-Control-Allow-Max-Age', 3600);
+  if ('OPTIONS' == req.method) return res.send(200);
+  next();
+});
+
+
 //app.all('*', function(req, res, next){ //app.all不管所有協定都去跑，*代表所有url也是
 	//console.log('count'+count++);//計算瀏覽次數
 	/*if (req.headers.host === 'localhost:3000') {
