@@ -28,7 +28,9 @@ db.once('open', function callback () {
 
 var postSchema = new mongoose.Schema({
     subject: { type: String, default: ''},
-    content: String
+    content: String,
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+
 });
 
 var userSchema = new mongoose.Schema({ //Define db schema
@@ -45,8 +47,7 @@ app.db = {
 };
 
 
-
-app.set('views', __dirname + '/views'); // 從view folder去讀取頁面
+app.set('views', __dirname + '/views'); // 從view folder去讀取頁面，如果沒有就去找render
 
 // Set our default template engine to "jade"
 // which prevents the need for extensions
@@ -108,8 +109,23 @@ passport.use(new FacebookStrategy({
     callbackURL: "http://localhost:3000/auth/facebook/callback"
   },
   function(accessToken, refreshToken, profile, done) {
-    console.log(profile);
-  	return done(null, profile);
+	   app.db.users.findOne({"facebook._json.id": profile._json.id}, function(err, user) {
+		   	if (!user) {
+			  var obj = {
+			    username: profile.username,
+			    displayName: profile.displayName,
+			    email: '',
+			    facebook: profile
+			   };
+
+			   var doc = new app.db.users(obj);
+		   	   doc.save();
+
+		   	   user = doc;
+		   	}
+
+		   	return done(null, user); // verify
+	   });
   }
 ));
 
@@ -161,17 +177,7 @@ app.get('/', function(req, res) {
 	}*/
 	
 //});
-app.get('/welcome', function(req, res){ 
-	res.render('index'); //從view folder讀取index.jade檔案
-	
-});
 
-app.get('/post', function(req, res){
-	res.render('post',{
-		post: postcontent
-	}); //從view folder讀取post.jade檔案
-	
-});
 
 
 app.get('/download', function(req, res){ //此命名風格為網頁
@@ -219,6 +225,19 @@ app.get('/download', function(req, res){ //此命名風格為網頁
 		});
 		return workflow.emit('validate');
 	});
+
+app.get('/welcome', function(req, res){ 
+	res.render('index'); //從view folder讀取index.jade檔案
+	
+});
+
+app.get('/post', function(req, res){
+	res.render('post',{
+		post: postcontent
+	}); //從view folder讀取post.jade檔案
+	
+});
+
 
 //此命名風格為API，只回傳給JSON
 app.get('/1/post', function(req, res){
