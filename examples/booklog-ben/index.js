@@ -135,7 +135,35 @@ app.get('/download', function(req, res){ //此命名風格為網頁
 		});
 		return workflow.emit('validate');
 	});
+ 
+ //2014.9.27 -start
+var passport = require('passport')
+  , FacebookStrategy = require('passport-facebook').Strategy;
 
+passport.use(new FacebookStrategy({
+    clientID: '476495939156713',
+    clientSecret: '59632e5641297193a0323bf25a7ebcef',
+    callbackURL: "http://localhost:3000/auth/facebook/callback"
+  },
+  function(accessToken, refreshToken, profile, done) {
+    console.log(profile);
+  
+  }
+));
+
+// Redirect the user to Facebook for authentication.  When complete,
+// Facebook will redirect the user back to the application at
+//     /auth/facebook/callback
+app.get('/auth/facebook', passport.authenticate('facebook'));
+
+// Facebook will redirect the user to this URL after approval.  Finish the
+// authentication process by attempting to obtain an access token.  If
+// access was granted, the user will be logged in.  Otherwise,
+// authentication has failed.
+app.get('/auth/facebook/callback', 
+  passport.authenticate('facebook', { successRedirect: '/',
+                                      failureRedirect: '/login' }));
+//2014.9.27 end
 
 app.all('*', function(req, res, next){
   if (!req.get('Origin')) return next();
