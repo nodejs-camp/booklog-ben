@@ -50,13 +50,12 @@ app.Post = Backbone.Model.extend({
     initialize: function() { //app.SearchView.Backbone.View.extend.initialize
         this.model = new app.Search(); //將上面宣告的app.search class實例化
         this.template = _.template($('#tmpl-results').html()); //實例化的template在index.jade去增加underscope
-
         this.model.bind('change', this.render, this);  //只要data model 有變動就去呼叫render      
     },
     render: function() {
         var data = this.template(this.model.attributes);
 
-        $('#search-result').html(data);
+        $('#search-result').html(data); //將資料寫到 id =search-result element
 
         return this;
     },

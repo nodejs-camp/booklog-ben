@@ -258,10 +258,24 @@ app.get('/1/post/:id', function(req, res) {
 
 app.get('/1/post/tag/:tag', function(req, res) {	
 	var tag = req.params.tag;
+	var posts = req.app.db.posts;
 
+	posts
+    .find( { $text: { $search: tag } } )
+    .exec(function(err, posts) {
+    	if (err) return console.log(err);
+        res.send({posts: posts});
+    });
+});
+
+/*
+app.get('/1/post/tag/:tag', function(req, res) {	
+	var tag = req.params.tag;
+	app.db.user.findOne();
 	// TBD:
 	console.log("SEARCHING...");
 });
+*/
 
 app.get('/1/post', function(req, res) {	
 	var posts = req.app.db.posts;
