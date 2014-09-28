@@ -90,7 +90,8 @@ var session = require('express-session');
 var passport = require('passport')
   , FacebookStrategy = require('passport-facebook').Strategy;
 
-app.use(session({ secret: 'keyboard cat' }));
+app.use(session({ secret: 'keyboard cat' })); 
+//app.use 為 middleware 概念，函數會自動判斷是否通過，通過函數裡面會自動下next()
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -108,12 +109,13 @@ passport.use(new FacebookStrategy({
     clientSecret: '59632e5641297193a0323bf25a7ebcef',
     callbackURL: "http://localhost:3000/auth/facebook/callback"
   },
-  function(accessToken, refreshToken, profile, done) {
+  function(accessToken, refreshToken, profile, done) { 
+  //Lambda寫法 可以把這函數放在第二顆ＣＰＵ，非同步，上面的ＵＳＥ可能會在第一顆ＣＰＵ跑
 	   app.db.users.findOne({"facebook._json.id": profile._json.id}, function(err, user) {
-		   	if (!user) {
+		   	if (!user) { //判斷資料庫有無此ＵＳＥＲ，有就不儲存了
 			  var obj = {
 			    username: profile.username,
-			    displayName: profile.displayName,
+			    displayName: profile.displayName, //author name
 			    email: '',
 			    facebook: profile
 			   };
@@ -226,21 +228,39 @@ app.get('/download', function(req, res){ //此命名風格為網頁
 		return workflow.emit('validate');
 	});
 
-app.get('/logout', function(req, res){
-  req.logout();
-  res.redirect('/');
-});
 
-app.get('/welcome', function(req, res){ 
+
+/*app.get('/welcome', function(req, res){ 
 	res.render('index'); //從view folder讀取index.jade檔案
 	
-});
+}); */
 
 app.get('/post', function(req, res){
 	res.render('post',{
 		post: postcontent
 	}); //從view folder讀取post.jade檔案
 	
+});
+
+app.get('/logout', function(req, res){
+  req.logout();
+  res.redirect('/');
+});
+
+app.get('/1/post/:id', function(req, res) {	
+	var id = req.params.id;
+	var posts = req.app.db.posts;
+
+	posts.findOne({_id: id}, function(err, post) {
+		res.send({post: post});	
+	});
+});
+
+app.get('/1/post/tag/:tag', function(req, res) {	
+	var tag = req.params.tag;
+
+	// TBD:
+	console.log("SEARCHING...");
 });
 
 app.get('/1/post', function(req, res) {	
@@ -263,6 +283,7 @@ app.post('/1/post', function(req, res, next) {
 	}
 });
 
+/*
 //此命名風格為API，只回傳給JSON
 app.get('/1/post', function(req, res){
 //call back function，前面行為set url執行完，再將後面匿名函數當作參數執行，req為express所給的物件
@@ -278,10 +299,11 @@ app.get('/1/post', function(req, res){
 	}; //{}為JS的物件 */
 	//res.send({post: posts});	
 	//res.send(result);
-});  
+//}); 
 
-app.post('/1/post', function(req, res){//call back function，前面為set url，後面為執行function
+app.post('/1/post', function(req, res) {
 	var posts = req.app.db.posts;
+	var userId = req.user._id;
 
 	var subject;
 	var content;
@@ -289,21 +311,22 @@ app.post('/1/post', function(req, res){//call back function，前面為set url�
 	if (typeof(req.body.subject) === 'undefined') {
 		subject = req.query.subject;
 		content = req.query.content;
-
 	} else {
 		subject = req.body.subject;
 		content = req.body.content;		
 	}
 
 	var data = {
+		userId: userId,
 		subject: subject,
 		content: content
 	};
-	console.log(data);
-	var post = new posts(data); //call method 會回傳一個參數給post
-	post.save(); //再把這參數存回
 
-	res.send({ status: 'OK'})
+	var post = new posts(data);
+	post.save();
+
+	res.send({ status: 'OK'});
+});
 
 	/*var subject;
 	var content;
@@ -325,7 +348,7 @@ app.post('/1/post', function(req, res){//call back function，前面為set url�
 
 	posts.push(post); 
 	res.send({status:'ok', posts:post}); */
-});  
+ 
 
 /*app.post('/1/post', function(req, res){ // app.post為rest post 方法
 	var result = {
@@ -350,6 +373,9 @@ app.put('/1/post/:postId', function(req, res){ //uri :後面代的為參數
 	}; //{}為JS的物件
 	res.send(result); */
 }); 
+
+
+
 
 app.delete('/1/post', function(req, res){
 	var posts = req.app.db.posts;
