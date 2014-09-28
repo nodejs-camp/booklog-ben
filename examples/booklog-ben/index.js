@@ -29,6 +29,7 @@ db.once('open', function callback () {
 var postSchema = new mongoose.Schema({
     subject: { type: String, default: ''},
     content: String,
+    timeCreated: {type: Date, default: Date.now},
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 
 });
@@ -279,10 +280,23 @@ app.get('/1/post/tag/:tag', function(req, res) {
 
 app.get('/1/post', function(req, res) {	
 	var posts = req.app.db.posts;
+	var sort = req.query.sort; // ?sort=date
+	var options = {};
+
+	// Default options
+	options = {
+		sort: 'timeCreated'
+	};
+
+	if (sort === 'date') {
+		options.sort = '+timeCreated' //-為遞減
+	}
+
 
 	posts
-	.find()
-	.populate('userId')
+	.find({})
+	.populate('userId') // 依據userId 將底下的資料全部展開
+	.sort(options.sort)
 	.exec(function(err, posts) {
 		res.send({posts: posts});	
 	});

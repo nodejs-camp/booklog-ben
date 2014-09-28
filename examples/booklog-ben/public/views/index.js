@@ -8,7 +8,7 @@
  **/
 app.Search = Backbone.Model.extend({  
   url: function(){
-    return 'http://localhost:3000/1/post/tag/' + this.attributes.tag //透過return的方式手動輸入的tag自動帶入
+    return 'http://localhost:3000/1/post/tag/' + this.tag //透過return的方式手動輸入的tag自動帶入
   },
   tag: '', //default tag
   defaults: { //default JSON
@@ -24,7 +24,10 @@ app.Search = Backbone.Model.extend({
 });
 
 app.Post = Backbone.Model.extend({  
-  url: 'http://localhost:3000/1/post',
+  url: function() {
+    return 'http://localhost:3000/1/post' + this.query
+  },
+  query: '',
   defaults: {
     success: false,
     errors: [],
@@ -62,7 +65,7 @@ app.Post = Backbone.Model.extend({
     performSearch: function() {
       var tag = this.$el.find('#search-tag').val();
       //this 為 app.SearchView，elemet id 為 el: '#blog-post'，再利用jQuery find去找到#search-tag element並取值
-      this.model.set('tag', tag);//只要data model 有變動就去呼叫render
+      this.model.tag = tag;//只要data model 有變動就去呼叫render
       this.model.fetch(); //會呼叫model api
     }
   });
@@ -70,6 +73,7 @@ app.Post = Backbone.Model.extend({
   app.PostView = Backbone.View.extend({ //給需要處理的區塊一個名稱
     el: '#blog-post', //element id
     events: { //定義區塊事件
+      'click .btn-filter': 'performFilter'
     },
     initialize: function() { //實例化model
         this.model = new app.Post();
@@ -84,6 +88,10 @@ app.Post = Backbone.Model.extend({
 
         this.$el.html(data);
         return this;
+    },
+    performFilter: function() {
+        this.model.query = '?sort=date';
+        this.model.fetch();
     }
   });
 
