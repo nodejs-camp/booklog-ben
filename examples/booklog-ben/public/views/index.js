@@ -8,7 +8,7 @@
  **/
 app.Search = Backbone.Model.extend({  
   url: function(){
-    return 'http://localhost:3000/1/post/tag/' + this.tag //透過return的方式手動輸入的tag自動帶入
+    return 'http://localhost:3000/1/post/tag/' + this.tag //透過return的方式將手動輸入的tag自動帶入
   },
   tag: '', //default tag
   defaults: { //default JSON
@@ -73,7 +73,8 @@ app.Post = Backbone.Model.extend({
   app.PostView = Backbone.View.extend({ //給需要處理的區塊一個名稱
     el: '#blog-post', //element id
     events: { //定義區塊事件
-      'click .btn-filter': 'performFilter'
+      'click .btn-filter': 'performFilter',
+      'click .btn-format': 'performFormat'
     },
     initialize: function() { //實例化model，construtor
         this.model = new app.Post();
@@ -92,6 +93,12 @@ app.Post = Backbone.Model.extend({
     performFilter: function() {
         this.model.query = '?sort=date';
         this.model.fetch();
+    },
+    performFormat: function() {
+        this.$el.find('.post-date').each(function () {
+          var me = $(this);
+          me.html( moment( me.text() ).fromNow() );
+        });
     }
   });
 
