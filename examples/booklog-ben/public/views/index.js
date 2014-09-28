@@ -75,7 +75,7 @@ app.Post = Backbone.Model.extend({
     events: { //定義區塊事件
       'click .btn-filter': 'performFilter'
     },
-    initialize: function() { //實例化model
+    initialize: function() { //實例化model，construtor
         this.model = new app.Post();
         this.template = _.template($('#tmpl-post').html());//實例化的template在index.jade去增加underscope
 

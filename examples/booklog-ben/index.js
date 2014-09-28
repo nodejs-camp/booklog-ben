@@ -289,7 +289,7 @@ app.get('/1/post', function(req, res) {
 	};
 
 	if (sort === 'date') {
-		options.sort = '+timeCreated' //-為遞減
+		options.sort = '-timeCreated' //-為遞減
 	}
 
 
