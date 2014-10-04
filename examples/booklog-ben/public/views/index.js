@@ -40,17 +40,61 @@ app.Post = Backbone.Model.extend({
        }]
   }
 });
+app.SinglePost = Backbone.Model.extend({  
+  url: 'http://localhost:3000/1/post',
+  defaults: {
+    success: false,
+    errors: [],
+    errfor: {},
 
+    content: '',
+    subject: ''
+  }
+});
 /**
  * VIEWS
  **/
+ app.FormView = Backbone.View.extend({
+    el: '#form-section',
+    events: {
+      'submit form': 'preventSubmit',
+      'click #btn-submit': 'performSubmit'
+    },
+    initialize: function() {
+        this.model = new app.SinglePost();
+
+        this.template = _.template($('#tmpl-form').html());
+        this.model.bind('change', this.render, this); 
+
+        this.render();       
+    },
+    render: function() {
+        var data = this.template(this.model.attributes);
+
+        this.$el.html(data);
+        return this;
+    },
+    preventSubmit: function(event) {
+        event.preventDefault();
+    },
+    performSubmit: function() {
+      var subject = this.$el.find('#subject').val();
+      var content = this.$el.find('#content').val();
+
+      this.model.save({
+        subject: subject,
+        content: content
+      });
+    }
+  });
+ 
   app.SearchView = Backbone.View.extend({ //給需要處理的區塊一個名稱
     el: '#search-section', //element id
     events: { //定義區塊事件
       'click .btn-search' : 'performSearch' 
       //定義click事件，.btn-search為頁面上哪個element要觸發此事件，performSearch為執行函數
     },
-    initialize: function() { //app.SearchView.Backbone.View.extend.initialize
+    initialize: function() { //app.SearchView.Backbone.View.extend.initialize，等於constructor
         this.model = new app.Search(); //將上面宣告的app.search class實例化
         this.template = _.template($('#tmpl-results').html()); //實例化的template在index.jade去增加underscope
         this.model.bind('change', this.render, this);  //只要data model 有變動就去呼叫render      

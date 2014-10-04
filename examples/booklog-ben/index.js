@@ -15,7 +15,7 @@ app.use(express.static(pub));
 
 
 // Optional since express defaults to CWD/views
-
+var events = require('events'); // require等於import events class，因為他是外部模組
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/booklog2');
 
@@ -112,6 +112,7 @@ passport.use(new FacebookStrategy({
   },
   function(accessToken, refreshToken, profile, done) { 
   //Lambda寫法 可以把這函數放在第二顆ＣＰＵ，非同步，上面的ＵＳＥ可能會在第一顆ＣＰＵ跑
+  		console.log(profile);
 	   app.db.users.findOne({"facebook._json.id": profile._json.id}, function(err, user) {
 		   	if (!user) { //判斷資料庫有無此ＵＳＥＲ，有就不儲存了
 			  var obj = {
@@ -182,9 +183,8 @@ app.get('/', function(req, res) {
 //});
 
 
-
 app.get('/download', function(req, res){ //此命名風格為網頁
-	var events = require('events'); // require等於import events class，因為他是外部模組
+	
 	var workflow = new events.EventEmitter(); //載入到記憶體中，類別實例化
 
 	workflow.outcome = {  //outcome 為一物件
@@ -330,30 +330,45 @@ app.get('/1/post', function(req, res){
 //}); 
 
 app.post('/1/post', function(req, res) {
+	var workflow = new events.EventEmitter();
 	var posts = req.app.db.posts;
 	var userId = req.user._id;
 
 	var subject;
 	var content;
 
-	if (typeof(req.body.subject) === 'undefined') {
-		subject = req.query.subject;
-		content = req.query.content;
-	} else {
-		subject = req.body.subject;
-		content = req.body.content;		
-	}
-
-	var data = {
-		userId: userId,
-		subject: subject,
-		content: content
+	workflow.outcome = {
+		success: false,
+		error: {}
 	};
 
-	var post = new posts(data);
-	post.save();
+	workflow.on('validate', function(){
+		subject = req.body.subject;
+		content = req.body.content;
+		if (subject === ''){
+			workflow.outcome.errfor.subject = '必填欄位';
+			return res.send(workflow.outcome);
+		}
+		workflow.emit('savePost');
+	});
 
-	res.send({ status: 'OK'});
+	workflow.on('savePost', function() {
+		var data = {
+			userId: userId,
+			subject: subject,
+			content: content
+		};
+
+		var post = new posts(data);
+		post.save();
+
+		workflow.outcome.success = true;
+		workflow.outcome.data = post;
+
+		res.send(workflow.outcome);
+	});
+
+	return workflow.emit('validation');
 });
 
 	/*var subject;

@@ -18,6 +18,28 @@ block content
                       span.glyphicon.glyphicon-search
               .well#search-result
 
+    .container
+        .row
+            .col-lg-8
+              form.form-horizontal
+                  fieldset
+                      legend Form Name
+                      .control-group
+                        label.control-label(for='textarea') Subject
+                        .controls
+                          textarea#textarea(name='textarea') Your subject
+                      .control-group
+                        label.control-label(for='textinput') Content
+                        .controls
+                          input#textinput.input-xlarge(name='textinput', type='text', placeholder='placeholder')
+                          p.help-block help
+                      .control-group
+                        label.control-label(for='singlebutton')
+                        .controls
+                          button#singlebutton.btn.btn-primary(name='singlebutton') Save
+
+
+
     script(type='text/template', id='tmpl-post')
       div#actions
         .btn-group
@@ -43,3 +65,15 @@ block content
       <% _.each(posts, function(post) { %>
       p <%= post.subject %>
       <% }); %>
+
+      script(type='text/template', id='tmpl-form')
+      form.form-horizontal
+        h3 Leave a Message
+        .form-group(class!='<%= errfor.subject ? "has-error" : "" %>')
+          label.control-label(for='subject') Subject
+          input.form-control#subject(name='subject', type='text')
+        .form-group
+          label.control-label(for='subject') Content
+          textarea.form-control#content(name='content')
+        .form-group
+          button#btn-submit.btn.btn-primary(name='btn-submit') Save
