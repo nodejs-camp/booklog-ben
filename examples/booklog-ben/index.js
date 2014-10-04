@@ -328,27 +328,32 @@ app.get('/1/post', function(req, res){
 	//res.send({post: posts});	
 	//res.send(result);
 //}); 
-
-app.post('/1/post', function(req, res) {
+var jsonParser = bodyParser.json();
+app.post('/1/post', jsonParser, function(req, res) {
 	var workflow = new events.EventEmitter();
 	var posts = req.app.db.posts;
 	var userId = req.user._id;
-
 	var subject;
 	var content;
 
 	workflow.outcome = {
 		success: false,
-		error: {}
+		errfor: {}
 	};
 
-	workflow.on('validate', function(){
+	workflow.on('validation', function() {
 		subject = req.body.subject;
-		content = req.body.content;
-		if (subject === ''){
-			workflow.outcome.errfor.subject = '必填欄位';
+		content = req.body.content;	
+
+		if (subject.length === 0) 
+			workflow.outcome.errfor.subject = '這是必填欄位';
+
+		if (content.length === 0) 
+			workflow.outcome.errfor.content = '這是必填欄位';
+
+		if (Object.keys(workflow.outcome.errfor).length !== 0)
 			return res.send(workflow.outcome);
-		}
+
 		workflow.emit('savePost');
 	});
 
@@ -370,6 +375,7 @@ app.post('/1/post', function(req, res) {
 
 	return workflow.emit('validation');
 });
+
 
 	/*var subject;
 	var content;

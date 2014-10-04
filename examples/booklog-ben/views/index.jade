@@ -10,35 +10,14 @@ block content
               div#blog-post
             .col-md-4
               .well#search-section
-                h4 Author Search
+                h4 Author search
                 .input-group
                   input.form-control#search-tag(type='text')
                   span.input-group-btn
                     button.btn.btn-default.btn-search(type='button')
                       span.glyphicon.glyphicon-search
               .well#search-result
-
-    .container
-        .row
-            .col-lg-8
-              form.form-horizontal
-                  fieldset
-                      legend Form Name
-                      .control-group
-                        label.control-label(for='textarea') Subject
-                        .controls
-                          textarea#textarea(name='textarea') Your subject
-                      .control-group
-                        label.control-label(for='textinput') Content
-                        .controls
-                          input#textinput.input-xlarge(name='textinput', type='text', placeholder='placeholder')
-                          p.help-block help
-                      .control-group
-                        label.control-label(for='singlebutton')
-                        .controls
-                          button#singlebutton.btn.btn-primary(name='singlebutton') Save
-
-
+        .row#form-section
 
     script(type='text/template', id='tmpl-post')
       div#actions
@@ -66,14 +45,17 @@ block content
       p <%= post.subject %>
       <% }); %>
 
-      script(type='text/template', id='tmpl-form')
+    script(type='text/template', id='tmpl-form')
       form.form-horizontal
         h3 Leave a Message
         .form-group(class!='<%= errfor.subject ? "has-error" : "" %>')
           label.control-label(for='subject') Subject
           input.form-control#subject(name='subject', type='text')
-        .form-group
+        .input-group
+          label.control-label(for='subject') Subject
+          input.form-control#subject(name='subject', type='text')
+        .input-group
           label.control-label(for='subject') Content
           textarea.form-control#content(name='content')
-        .form-group
+        .input-group
           button#btn-submit.btn.btn-primary(name='btn-submit') Save

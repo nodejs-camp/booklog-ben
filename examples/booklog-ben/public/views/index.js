@@ -54,7 +54,8 @@ app.SinglePost = Backbone.Model.extend({
 /**
  * VIEWS
  **/
- app.FormView = Backbone.View.extend({
+ 
+  app.FormView = Backbone.View.extend({
     el: '#form-section',
     events: {
       'submit form': 'preventSubmit',
@@ -64,9 +65,8 @@ app.SinglePost = Backbone.Model.extend({
         this.model = new app.SinglePost();
 
         this.template = _.template($('#tmpl-form').html());
-        this.model.bind('change', this.render, this); 
-
-        this.render();       
+        this.model.bind('change', this.render, this);
+        this.render();
     },
     render: function() {
         var data = this.template(this.model.attributes);
@@ -87,7 +87,7 @@ app.SinglePost = Backbone.Model.extend({
       });
     }
   });
- 
+
   app.SearchView = Backbone.View.extend({ //給需要處理的區塊一個名稱
     el: '#search-section', //element id
     events: { //定義區塊事件
@@ -154,4 +154,5 @@ app.SinglePost = Backbone.Model.extend({
   $(document).ready(function() {
     app.postView = new app.PostView(); //把上面的view's class 實例化
     app.searchView = new app.SearchView();
+    app.formView = new app.FormView();
   });
