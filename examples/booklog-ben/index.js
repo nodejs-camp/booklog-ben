@@ -133,6 +133,17 @@ passport.use(new FacebookStrategy({
   }
 ));
 
+
+var paypal_api = require('paypal-rest-sdk');
+
+var config_opts = {
+    'host': 'api.sandbox.paypal.com',
+    'port': '',
+    'client_id': 'AU_RBxCQGol1uvqCylGesB__ABXMk5vMAx0sXmYVkfg_YPf6pVtAmXxy1O_g',
+    'client_secret': 'EMwlFRDh8ZWQR9a27qUL6Tb9btD2oL2k_Fszp5LBqHqCoIzzYGtaUxDBgRJi'
+};
+
+
 // Redirect the user to Facebook for authentication.  When complete,
 // Facebook will redirect the user back to the application at
 //     /auth/facebook/callback
@@ -408,12 +419,14 @@ app.post('/1/post', jsonParser, function(req, res) {
 });  */
 
 app.put('/1/post/:postId', function(req, res){ //uri :後面代的為參數
+	//var id = req.params.postId;
+	//var posts = req.app.db.posts;
 	var id = req.params.postId;
-	var posts = req.app.db.posts;
 
-	posts.findOne({_id: id}, function(err, post) {
+	res.send("Update a post: " + id);
+	/*posts.findOne({_id: id}, function(err, post) {
 		res.send({post: post});	
-	});
+	});*/
 	//res.send("updated a post"+id);
 
 	/*var result = {
@@ -440,6 +453,104 @@ app.delete('/1/post', function(req, res){
 	}; //{}為JS的物件
 	res.send(result);*/
 }); 
+
+/**
+ * POST /1/post/:postId/pay
+ */
+app.put('/1/post/:postId/pay', function(req, res, next) {
+    var workflow = new events.EventEmitter();
+    var postId = req.params.postId;
+    var posts = req.app.db.posts;
+    
+    workflow.outcome = {
+    	success: false
+    };
+
+    workflow.on('validate', function() {
+        workflow.emit('createPayment');
+    });
+
+    workflow.on('createPayment', function() {
+		paypal_api.configure(config_opts);
+
+		var create_payment_json = {
+		            intent: 'sale',
+		            payer: {
+		                payment_method: 'paypal'
+		            },
+		            redirect_urls: {
+
+		                // http://localhost:3000/1/post/539eb886e8dbde4b39000007/paid?token=EC-4T17102178173001V&PayerID=QPPLBGBK5ZTVS
+		                return_url: 'http://localhost:3000/1/post/' + postId + '/paid',
+		                cancel_url: 'http://localhost:3000/1/post/' + postId + '/cancel'
+		            },
+		            transactions: [{
+		                amount: {
+		                    currency: 'TWD',
+		                    total: 99
+		                },
+		                description: '購買教學文章'
+		            }]
+		};
+
+		paypal_api.payment.create(create_payment_json, function (err, payment) {
+		    if (err) {
+		        console.log(err);
+		    }
+
+		    if (payment) {
+		        console.log("Create Payment Response");
+		        console.log(payment);
+		    }
+
+		    var order = {
+		    	userId: req.user._id,
+		    	paypal: payment
+		    };
+
+			posts
+			.findByIdAndUpdate(postId, { $addToSet: { orders: order } }, function(err, post) {
+				workflow.outcome.success = true;
+				workflow.outcome.data = post;
+				return res.send(workflow.outcome);
+			});
+		});
+    });
+
+    return workflow.emit('validate');
+});
+
+/* GET /1/post/:postId/paid
+ */
+app.get('/1/post/:postId/paid', function(req, res, next) {
+    var workflow = new events.EventEmitter();
+    var postId = req.params.postId;
+    var posts = req.app.db.posts;
+    var payerId = req.query.PayerID;
+    var paymentId;
+    
+    workflow.outcome = {
+    	success: false
+    };
+
+    workflow.on('validate', function() {
+        //paypal.payment.execute(paymentId, { payer_id: payerId }, function (err, payment) {
+        //    return workflow.emit('updateCustomer');
+        //});
+        return workflow.emit('updateCustomer');
+    });
+
+    workflow.on('updateCustomer', function() {
+		posts
+		.findByIdAndUpdate(postId, { $addToSet: { customers: req.user._id } }, function(err, post) {
+			workflow.outcome.success = true;
+			return res.send(workflow.outcome);
+		});
+    });
+
+    return workflow.emit('validate');
+});
+
 // change this to a better error handler in your code
 // sending stacktrace to users in production is not good
 app.use(function(err, req, res, next) {

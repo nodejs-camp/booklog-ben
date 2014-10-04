@@ -51,6 +51,17 @@ app.SinglePost = Backbone.Model.extend({
     subject: ''
   }
 });
+
+app.PurchasePost = Backbone.Model.extend({  
+  url: function() {
+    return 'http://localhost:3000/1/post/' + this.attributes.id + '/pay'
+  },
+  defaults: {
+    success: false,
+    errors: [],
+    errfor: {},
+  }
+});
 /**
  * VIEWS
  **/
@@ -118,10 +129,12 @@ app.SinglePost = Backbone.Model.extend({
     el: '#blog-post', //element id
     events: { //定義區塊事件
       'click .btn-filter': 'performFilter',
-      'click .btn-format': 'performFormat'
+      'click .btn-format': 'performFormat',
+      'click [data-purchase-for]': 'performPurchase' //將所有有此編號的元素有觸發此event 
     },
     initialize: function() { //實例化model，construtor
         this.model = new app.Post();
+        this.purchase = new app.PurchasePost();
         this.template = _.template($('#tmpl-post').html());//實例化的template在index.jade去增加underscope
 
         this.model.bind('change', this.render, this);//只要data model 有變動就去呼叫render
@@ -142,6 +155,22 @@ app.SinglePost = Backbone.Model.extend({
         this.$el.find('.post-date').each(function () {
           var me = $(this);
           me.html( moment( me.text() ).fromNow() );
+        });
+    },
+    performPurchase: function(event) {
+        var me = this.$el.find(event.target);//透過jQuery去找到此目標元素
+        var postId = me.data('purchase-for');//將element的data attribute取出
+        var self = this; //此this為已經實例化(new過)的app.PostView 
+
+        this.purchase.set('id', postId);//將此id送回model
+        this.purchase.save(this.model.attributes, { 
+        //backbone會自動判斷此id是否有存在model，如果沒有就用post，有的話就用put(update)
+          success: function(model, response, options) {
+            alert('訂購成功。等候付款！')
+          },
+          error: function(model, response, options) {
+            alert('失敗')
+          }
         });
     }
   });
