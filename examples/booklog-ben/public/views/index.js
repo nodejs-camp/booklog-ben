@@ -25,7 +25,7 @@ app.Search = Backbone.Model.extend({
 
 app.Post = Backbone.Model.extend({  
   url: function() {
-    return 'http://archer-booklog.cloudapp.net:3000/1/post' + this.query
+    return 'http://localhost:3000/1/post' + this.query
   },
   query: '',
   defaults: {
