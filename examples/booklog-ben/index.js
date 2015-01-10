@@ -106,8 +106,8 @@ passport.deserializeUser(function(obj, done) {
 
 
 passport.use(new FacebookStrategy({
-    clientID: '476495939156713',
-    clientSecret: '59632e5641297193a0323bf25a7ebcef',
+    clientID: '744985092241572',
+    clientSecret: '96da3462ad51a4fab91a601b924d528a',
     callbackURL: "http://archer-booklog.cloudapp.net/auth/facebook/callback"
   },
   function(accessToken, refreshToken, profile, done) { 
