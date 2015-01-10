@@ -4,7 +4,7 @@
   var app = app || {};
 
 /**
- * MODELS
+ * MODELS 有接API才要放
  **/
 app.Search = Backbone.Model.extend({  
   url: function(){
@@ -17,15 +17,15 @@ app.Search = Backbone.Model.extend({
     errfor: {},
     
     posts: [{
-           "_id": '',
-           "subject": ''
+           "_id": '1234',
+           "subject": 'test'
        }]
   }
 });
 
 app.Post = Backbone.Model.extend({  
   url: function() {
-    return 'http://localhost:3000/1/post' + this.query
+    return 'http://archer-booklog.cloudapp.net:3000/1/post' + this.query
   },
   query: '',
   defaults: {
@@ -40,6 +40,7 @@ app.Post = Backbone.Model.extend({
        }]
   }
 });
+
 app.SinglePost = Backbone.Model.extend({  
   url: 'http://localhost:3000/1/post',
   defaults: {

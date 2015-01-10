@@ -108,10 +108,10 @@ app.get('/1/post', function(req,res){
 app.post('/1/post', function(req, res){
 	var subject;
 	var content;
-	if (typeof(req.body)==='undefined'){
-		subject = req.query.subject;
-		content = req.query.content;
-	};
+	//if (typeof(req.body)==='undefined'){
+		subject = req.params.subject;
+		content = req.params.content;
+	//};
 	var post = {
 		subject : subject,
 		content : content

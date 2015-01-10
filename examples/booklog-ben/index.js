@@ -25,7 +25,7 @@ db.once('open', function callback () {
   console.log('MongoDB: connected.');	
 });
 
-
+	
 var postSchema = new mongoose.Schema({
     subject: { type: String, default: ''},
     content: String,
@@ -108,7 +108,7 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new FacebookStrategy({
     clientID: '476495939156713',
     clientSecret: '59632e5641297193a0323bf25a7ebcef',
-    callbackURL: "http://localhost:3000/auth/facebook/callback"
+    callbackURL: "http://archer-booklog.cloudapp.net/auth/facebook/callback"
   },
   function(accessToken, refreshToken, profile, done) { 
   //Lambda寫法 可以把這函數放在第二顆ＣＰＵ，非同步，上面的ＵＳＥ可能會在第一顆ＣＰＵ跑
@@ -479,8 +479,7 @@ app.put('/1/post/:postId/pay', function(req, res, next) {
 		                payment_method: 'paypal'
 		            },
 		            redirect_urls: {
-
-		                // http://localhost:3000/1/post/539eb886e8dbde4b39000007/paid?token=EC-4T17102178173001V&PayerID=QPPLBGBK5ZTVS
+// http://localhost:3000/1/post/539eb886e8dbde4b39000007/paid?token=EC-4T17102178173001V&PayerID=QPPLBGBK5ZTVS
 		                return_url: 'http://localhost:3000/1/post/' + postId + '/paid',
 		                cancel_url: 'http://localhost:3000/1/post/' + postId + '/cancel'
 		            },
